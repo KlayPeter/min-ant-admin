@@ -4,7 +4,7 @@ import {
   ProFormTreeSelect,
 } from "@ant-design/pro-components";
 import type { ProFormInstance } from "@ant-design/pro-components";
-import { Card, Modal, Row, Col } from "antd";
+import { Card, Modal } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import Apis from "@/apis";
 
@@ -40,7 +40,7 @@ const MenuModel = forwardRef<
 
   const loadMenu = async () => {
     try {
-      const res = await Apis.system.menu.getMenuTree({});
+      const res = await Apis.system.menu.getMenuTree();
       const flatMenuTree = enhanceMenuTree(res.data);
       return flatMenuTree;
     } catch (error) {

@@ -81,7 +81,7 @@ const Menu: React.FC = () => {
 
   const loadMenu = async () => {
     try {
-      const res = await Apis.system.menu.getMenuTree({});
+      const res = await Apis.system.menu.getMenuTree();
       setMenuTree(res.data);
     } catch (error) {
       console.warn("接口调用失败，使用Mock数据:", error);

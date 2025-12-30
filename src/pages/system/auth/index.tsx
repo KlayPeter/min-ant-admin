@@ -6,77 +6,6 @@ import { Button, message, Radio, Select } from 'antd';
 import { SaveOutlined, MinusSquareOutlined, PlusSquareOutlined } from '@ant-design/icons';
 import { PageContent } from '@/components';
 
-// Mock 数据
-const mockMenuTree = [
-  {
-    id: 1,
-    menuName: '首页',
-    src: '/dashboard',
-    seq: 1,
-    parentId: null,
-    ck: true,
-    children: [],
-  },
-  {
-    id: 2,
-    menuName: '系统管理',
-    src: '/system',
-    seq: 2,
-    parentId: null,
-    ck: true,
-    children: [
-      {
-        id: 21,
-        menuName: '用户管理',
-        src: '/system/user',
-        seq: 1,
-        parentId: 2,
-        ck: true,
-        children: [],
-      },
-      {
-        id: 22,
-        menuName: '角色管理',
-        src: '/system/role',
-        seq: 2,
-        parentId: 2,
-        ck: false,
-        children: [],
-      },
-      {
-        id: 23,
-        menuName: '菜单管理',
-        src: '/system/menu',
-        seq: 3,
-        parentId: 2,
-        ck: true,
-        children: [],
-      },
-      {
-        id: 24,
-        menuName: '权限管理',
-        src: '/system/auth',
-        seq: 4,
-        parentId: 2,
-        ck: false,
-        children: [],
-      },
-    ],
-  },
-];
-
-const mockRoles = [
-  { id: 1, roleName: '超级管理员', label: '超级管理员', value: 1 },
-  { id: 2, roleName: '管理员', label: '管理员', value: 2 },
-  { id: 3, roleName: '普通用户', label: '普通用户', value: 3 },
-];
-
-const mockUsers = [
-  { userId: 1, realName: '张三', label: '张三', value: 1 },
-  { userId: 2, realName: '李四', label: '李四', value: 2 },
-  { userId: 3, realName: '王五', label: '王五', value: 3 },
-];
-
 export default () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>();
   const [roleAdminList, setRoleAdminList] = useState<any[]>([]);
@@ -91,18 +20,18 @@ export default () => {
    */
   const loadRoleAdminList = async () => {
     try {
-      const res: any = await Apis.system.role.getRoleAdminList();
-      const tempList = res?.data ?? mockRoles;
-      const sortedList = tempList.sort((a: any, b: any) => b.id - a.id);
-      const transformedObject = sortedList.map((item: any) => ({
+      const res = await Apis.system.role.getRoleAdminList();
+      const roles = res?.data ?? [];
+      const transformedObject = roles.map((item: any) => ({
         ...item,
         label: item.roleName,
         value: item.id,
       }));
+      console.log('角色列表:', transformedObject);
       setRoleAdminList(transformedObject);
     } catch (e) {
-      // 使用 mock 数据
-      setRoleAdminList(mockRoles);
+      console.error('获取角色列表失败:', e);
+      message.error('获取角色列表失败');
     }
   };
 
@@ -111,22 +40,24 @@ export default () => {
    */
   const loadUserList = async () => {
     try {
-      const res: any = await Apis.system.user.getUserList({ rows: 999, status: 1 });
-      const tempList = res?.data?.rows ?? mockUsers;
+      const res = await Apis.system.user.getUserList({ rows: 999, status: 1 });
+      const tempList = res?.rows ?? [];
       const transformedObject = tempList.map((item: any) => ({
         ...item,
         label: item.realName,
         value: item.userId,
       }));
+      console.log('用户列表:', transformedObject);
       setCurrUsers(transformedObject);
     } catch (e) {
-      // 使用 mock 数据
-      setCurrUsers(mockUsers);
+      console.error('获取用户列表失败:', e);
+      message.error('获取用户列表失败');
     }
   };
 
   /**
    * 遍历拿到所有ck true的id
+   * @param menuList
    */
   const initCheckMenuList = (menuList: any[]) => {
     try {
@@ -147,7 +78,7 @@ export default () => {
       setAllMenuData(allNodes);
       setSelectedRowKeys(ids);
     } catch (e) {
-      console.error(e);
+      console.error('初始化菜单选择失败:', e);
     }
   };
 
@@ -290,6 +221,7 @@ export default () => {
     onChange: handleSelectionChange,
   };
 
+  // 用户保存
   const saveMenuWithUserIds = async () => {
     try {
       if (currUserId) {
@@ -308,10 +240,12 @@ export default () => {
         message.error('请先选择某个账号');
       }
     } catch (e) {
-      message.success('保存成功（Mock）');
+      console.error('保存用户菜单失败:', e);
+      message.error('保存失败');
     }
   };
 
+  // 角色保存
   const saveMenuWithRoleIds = async () => {
     try {
       if (currRoleId) {
@@ -330,17 +264,20 @@ export default () => {
         message.error('请先选择某个角色');
       }
     } catch (e) {
-      message.success('保存成功（Mock）');
+      console.error('保存角色菜单失败:', e);
+      message.error('保存失败');
     }
   };
 
+  /**
+   * 根据roleId去拉菜单
+   * @param params
+   */
   const loadMenuByRoleId = async (params: any) => {
     try {
-      if (params) {
-        if (params['roleId']) {
-          setCurrRoleId(params['roleId']);
-        }
-        const res: any = await Apis.system.auth.getMenuTreeWithRole(params);
+      if (params && params['roleId']) {
+        setCurrRoleId(params['roleId']);
+        const res = await Apis.system.auth.getMenuTreeWithRole(params);
         initCheckMenuList(res.data);
         return res;
       } else {
@@ -348,19 +285,21 @@ export default () => {
         return { data: [] };
       }
     } catch (error) {
-      // 使用 mock 数据
-      initCheckMenuList(mockMenuTree);
-      return { data: mockMenuTree };
+      console.error('获取角色菜单失败:', error);
+      message.error('获取角色菜单失败');
+      return { data: [] };
     }
   };
 
+  /**
+   * 根据userId去拉菜单
+   * @param params
+   */
   const loadMenuByUserId = async (params: any) => {
     try {
-      if (params) {
-        if (params['userId']) {
-          setCurrUserId(params['userId']);
-        }
-        const res: any = await Apis.system.auth.getMenuTreeWithUser(params);
+      if (params && params['userId']) {
+        setCurrUserId(params['userId']);
+        const res = await Apis.system.auth.getMenuTreeWithUser(params);
         initCheckMenuList(res.data);
         return res;
       } else {
@@ -368,9 +307,9 @@ export default () => {
         return { data: [] };
       }
     } catch (error) {
-      // 使用 mock 数据
-      initCheckMenuList(mockMenuTree);
-      return { data: mockMenuTree };
+      console.error('获取用户菜单失败:', error);
+      message.error('获取用户菜单失败');
+      return { data: [] };
     }
   };
 

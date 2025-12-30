@@ -258,15 +258,11 @@ const OrgUser: React.FC = () => {
             新建
           </Button>,
         ]}
-        request={async (params: any) => {
-          const res: any = await Apis.system.role.getRoleAdminList({
-            id: params["roleName"],
-            page: params["current"],
-            rows: params["pageSize"],
-          });
+        request={async () => {
+          const res: any = await Apis.system.role.getRoleAdminList();
           const temp = {
             data: res.data ?? [],
-            total: res.data?.total ?? 0,
+            total: res.data?.length ?? 0,
             success: true,
           };
           return temp;
