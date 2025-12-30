@@ -1,4 +1,5 @@
 import request from '@/utils/request';
+import supabaseApi from './supabase';
 
 export default {
   org: {
@@ -105,4 +106,6 @@ export default {
       },
     }),
   },
+  // Supabase API（新增）
+  supabase: supabaseApi,
 };

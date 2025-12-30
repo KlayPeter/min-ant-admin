@@ -7,11 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:test": "tsx db/test-connection.ts",
+    "db:setup": "tsx db/setup.ts"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
     "@ant-design/pro-components": "^2.8.10",
+    "@supabase/supabase-js": "^2.89.0",
     "ant-design": "^1.0.0",
     "antd": "^5.29.3",
     "axios": "^1.13.2",
@@ -34,6 +37,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "sass-embedded": "^1.97.0",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4"
