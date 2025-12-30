@@ -1,0 +1,69 @@
+.pageContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  :global(form .ant-card-body) {
+    overflow: auto !important;
+  }
+
+  :global(.ant-table-content table thead.ant-table-thead tr th) {
+    white-space: nowrap;
+  }
+  :global(.ant-table-content table tr td) {
+    white-space: nowrap;
+  }
+}
+.headerBox {
+  margin-bottom: 12px;
+  background: #fff;
+  border-bottom: 1px solid #f2f3f5;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  padding: 0 24px;
+}
+.box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  font-size: 18px;
+
+  .leftArea {
+    display: flex;
+    align-items: center;
+    .title {
+      padding-right: 12px;
+    }
+  }
+  .back {
+    margin-right: 8px;
+    font-weight: 600;
+    font-size: 18px;
+    &:hover {
+      color: #1677ff; /* Ant Design primary color */
+      cursor: pointer;
+    }
+  }
+}
+.subArea {
+  background: #fff;
+  margin-top: -8px;
+  :global(.ant-tabs-nav) {
+    margin-bottom: 0 !important;
+  }
+  :global(.ant-tabs-nav::before) {
+    border-width: 0 !important;
+  }
+}
+.contentBox {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px 0 12px;
+  border-bottom: 0 solid #000;
+  overflow-y: auto;
+}

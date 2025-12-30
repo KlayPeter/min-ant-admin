@@ -1,0 +1,22 @@
+:global(#md-login-page > .ant-pro-form-login-page) {
+  background-color: #000 !important;
+}
+
+:global(#md-login-page) {
+  .ant-pro-form-login-page {
+    background-size: cover;
+    background-position: center;
+  }
+
+  .ant-pro-form-login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ant-pro-form-login-main {
+    width: 100%;
+    max-width: 400px;
+  }
+}
