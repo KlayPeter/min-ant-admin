@@ -63,6 +63,35 @@ npm start
 
 服务将运行在 `http://localhost:8080`
 
+## API 文档
+
+### 🚀 自动生成 Swagger 文档
+
+本项目使用 `swagger-autogen` **自动生成** API 文档，无需手写注释！
+
+#### 生成文档
+```bash
+npm run swagger
+```
+
+#### 访问文档
+访问 **http://localhost:8080/api-docs** 查看完整的 API 文档。
+
+Swagger UI 提供：
+- 📖 完整的接口文档（自动生成）
+- 🧪 在线测试功能
+- 📝 请求/响应示例
+- 🔍 数据模型定义
+
+#### 工作流程
+1. 修改或添加接口
+2. 运行 `npm run swagger` 自动生成文档
+3. 刷新浏览器查看更新
+
+详细说明请查看：
+- [SWAGGER.md](./SWAGGER.md) - 完整文档说明
+- [快速开始.md](./快速开始.md) - 快速上手指南
+
 ## API 接口
 
 ### 用户管理

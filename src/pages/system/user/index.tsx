@@ -323,7 +323,7 @@ const OrgUser: React.FC = () => {
       <ProTable
         headerTitle="用户列表"
         actionRef={actionRef}
-        rowKey="id"
+        rowKey="userId"
         search={{
           labelWidth: "auto",
         }}

@@ -7,6 +7,22 @@ const router = express.Router();
 
 // 获取角色菜单权限树
 router.post('/getMenuTreeWithRole', async (req, res) => {
+  // #swagger.tags = ['权限管理']
+  // #swagger.summary = '获取角色菜单权限树'
+  /* #swagger.requestBody = {
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          required: ["roleId"],
+          properties: {
+            roleId: { type: "string", description: "角色ID", example: "507f1f77bcf86cd799439011" }
+          }
+        }
+      }
+    }
+  } */
   try {
     const { roleId } = req.body;
     const role = await Role.findById(roleId).populate('menus');
@@ -31,6 +47,22 @@ router.post('/getMenuTreeWithRole', async (req, res) => {
 
 // 获取用户菜单权限树
 router.post('/getMenuTreeWithUser', async (req, res) => {
+  // #swagger.tags = ['权限管理']
+  // #swagger.summary = '获取用户菜单权限树'
+  /* #swagger.requestBody = {
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          required: ["userId"],
+          properties: {
+            userId: { type: "string", description: "用户ID", example: "507f1f77bcf86cd799439011" }
+          }
+        }
+      }
+    }
+  } */
   try {
     const { userId } = req.body;
     const user = await User.findById(userId).populate({
@@ -40,7 +72,6 @@ router.post('/getMenuTreeWithUser', async (req, res) => {
     
     const allMenus = await Menu.find({ status: 1 }).sort({ sortOrder: 1 });
     
-    // 获取用户所有角色的菜单
     const userMenuIds = new Set();
     user?.roles.forEach(role => {
       role.menus?.forEach(menu => {
@@ -65,6 +96,23 @@ router.post('/getMenuTreeWithUser', async (req, res) => {
 
 // 保存角色菜单权限
 router.post('/saveRoleMenu', async (req, res) => {
+  // #swagger.tags = ['权限管理']
+  // #swagger.summary = '保存角色菜单权限'
+  /* #swagger.requestBody = {
+    required: true,
+    content: {
+      "application/json": {
+        schema: {
+          type: "object",
+          required: ["roleId", "menuIds"],
+          properties: {
+            roleId: { type: "string", description: "角色ID", example: "507f1f77bcf86cd799439011" },
+            menuIds: { type: "string", description: "菜单ID列表，逗号分隔", example: "id1,id2,id3" }
+          }
+        }
+      }
+    }
+  } */
   try {
     const { roleId, menuIds } = req.body;
     const menuIdArray = menuIds ? menuIds.split(',') : [];

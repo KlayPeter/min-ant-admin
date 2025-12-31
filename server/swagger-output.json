@@ -1,0 +1,1171 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Admin System API",
+    "version": "1.0.0",
+    "description": "后台管理系统 API 文档 - 自动生成"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "用户管理",
+      "description": "用户相关接口"
+    },
+    {
+      "name": "角色管理",
+      "description": "角色相关接口"
+    },
+    {
+      "name": "菜单管理",
+      "description": "菜单相关接口"
+    },
+    {
+      "name": "权限管理",
+      "description": "权限相关接口"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/manage/sys/user/getUserList": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "获取用户列表（分页）",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "userId": {
+                                "type": "string",
+                                "example": "507f1f77bcf86cd799439011"
+                              },
+                              "realName": {
+                                "type": "string",
+                                "example": "张三"
+                              },
+                              "email": {
+                                "type": "string",
+                                "example": "zhangsan@example.com"
+                              },
+                              "avatarUrl": {
+                                "type": "string",
+                                "example": "https://example.com/avatar.jpg"
+                              },
+                              "status": {
+                                "type": "number",
+                                "example": 1
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "example": "2024-01-01T00:00:00.000Z"
+                              },
+                              "roles": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string",
+                                      "example": "507f1f77bcf86cd799439012"
+                                    },
+                                    "roleName": {
+                                      "type": "string",
+                                      "example": "管理员"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "number",
+                          "example": 100
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "type": "number",
+                    "description": "页码",
+                    "example": 1
+                  },
+                  "rows": {
+                    "type": "number",
+                    "description": "每页数量",
+                    "example": 10
+                  },
+                  "status": {
+                    "type": "number",
+                    "description": "状态筛选 1:启用 0:禁用",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/user/addUser": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "添加用户",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "realName",
+                  "email",
+                  "pwd"
+                ],
+                "properties": {
+                  "realName": {
+                    "type": "string",
+                    "description": "真实姓名",
+                    "example": "张三"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "邮箱",
+                    "example": "zhangsan@example.com"
+                  },
+                  "pwd": {
+                    "type": "string",
+                    "description": "密码",
+                    "example": "123456"
+                  },
+                  "roleId": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "角色ID数组",
+                    "example": [
+                      "507f1f77bcf86cd799439012"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/user/editUser": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "编辑用户",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "用户ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  },
+                  "realName": {
+                    "type": "string",
+                    "description": "真实姓名",
+                    "example": "张三"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "邮箱",
+                    "example": "zhangsan@example.com"
+                  },
+                  "roleId": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "角色ID数组",
+                    "example": [
+                      "507f1f77bcf86cd799439012"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/user/deleteUser": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "删除用户",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "用户ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/user/changeUserStatus": {
+      "post": {
+        "tags": [
+          "用户管理"
+        ],
+        "summary": "修改用户状态",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "status"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "用户ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  },
+                  "status": {
+                    "type": "number",
+                    "description": "状态 1:启用 0:禁用",
+                    "example": 1,
+                    "enum": [
+                      0,
+                      1
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/role/getRoleAdminList": {
+      "post": {
+        "tags": [
+          "角色管理"
+        ],
+        "summary": "获取角色列表（分页）",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "type": "number",
+                    "description": "页码",
+                    "example": 1
+                  },
+                  "rows": {
+                    "type": "number",
+                    "description": "每页数量",
+                    "example": 10
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/role/getAllRoles": {
+      "post": {
+        "tags": [
+          "角色管理"
+        ],
+        "summary": "获取所有角色（不分页）",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/manage/sys/role/addRole": {
+      "post": {
+        "tags": [
+          "角色管理"
+        ],
+        "summary": "添加角色",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "roleName",
+                  "roleCode"
+                ],
+                "properties": {
+                  "roleName": {
+                    "type": "string",
+                    "description": "角色名称",
+                    "example": "管理员"
+                  },
+                  "roleCode": {
+                    "type": "string",
+                    "description": "角色编码",
+                    "example": "admin"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "描述",
+                    "example": "系统管理员"
+                  },
+                  "sortOrder": {
+                    "type": "number",
+                    "description": "排序",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/role/editRole": {
+      "post": {
+        "tags": [
+          "角色管理"
+        ],
+        "summary": "编辑角色",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "角色ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  },
+                  "roleName": {
+                    "type": "string",
+                    "description": "角色名称",
+                    "example": "管理员"
+                  },
+                  "roleCode": {
+                    "type": "string",
+                    "description": "角色编码",
+                    "example": "admin"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "描述",
+                    "example": "系统管理员"
+                  },
+                  "sortOrder": {
+                    "type": "number",
+                    "description": "排序",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/role/deleteRole": {
+      "post": {
+        "tags": [
+          "角色管理"
+        ],
+        "summary": "删除角色",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "角色ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/role/getRoleUserList": {
+      "post": {
+        "tags": [
+          "角色管理"
+        ],
+        "summary": "获取角色用户列表",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roleId": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/role/UpdateRoleUserList": {
+      "post": {
+        "tags": [
+          "角色管理"
+        ],
+        "summary": "更新角色用户",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roleId": {
+                    "example": "any"
+                  },
+                  "userIds": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/menu/getMenuTree": {
+      "post": {
+        "tags": [
+          "菜单管理"
+        ],
+        "summary": "获取菜单树",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/manage/sys/menu/addMenuTree": {
+      "post": {
+        "tags": [
+          "菜单管理"
+        ],
+        "summary": "添加菜单",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "menuName",
+                  "menuCode",
+                  "menuType"
+                ],
+                "properties": {
+                  "parentId": {
+                    "type": "string",
+                    "description": "父菜单ID",
+                    "example": null
+                  },
+                  "menuName": {
+                    "type": "string",
+                    "description": "菜单名称",
+                    "example": "系统管理"
+                  },
+                  "menuCode": {
+                    "type": "string",
+                    "description": "菜单编码",
+                    "example": "system"
+                  },
+                  "menuType": {
+                    "type": "number",
+                    "description": "菜单类型 1:目录 2:菜单 3:按钮",
+                    "example": 1,
+                    "enum": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  "path": {
+                    "type": "string",
+                    "description": "路由路径",
+                    "example": "/system"
+                  },
+                  "component": {
+                    "type": "string",
+                    "description": "组件路径",
+                    "example": "Layout"
+                  },
+                  "icon": {
+                    "type": "string",
+                    "description": "图标",
+                    "example": "SettingOutlined"
+                  },
+                  "sortOrder": {
+                    "type": "number",
+                    "description": "排序",
+                    "example": 1
+                  },
+                  "visible": {
+                    "type": "number",
+                    "description": "是否可见 1:是 0:否",
+                    "example": 1
+                  },
+                  "status": {
+                    "type": "number",
+                    "description": "状态 1:启用 0:禁用",
+                    "example": 1
+                  },
+                  "permissionCode": {
+                    "type": "string",
+                    "description": "权限编码",
+                    "example": "system:view"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/menu/editMenuTree": {
+      "post": {
+        "tags": [
+          "菜单管理"
+        ],
+        "summary": "编辑菜单",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "菜单ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  },
+                  "parentId": {
+                    "type": "string",
+                    "description": "父菜单ID"
+                  },
+                  "menuName": {
+                    "type": "string",
+                    "description": "菜单名称"
+                  },
+                  "menuCode": {
+                    "type": "string",
+                    "description": "菜单编码"
+                  },
+                  "menuType": {
+                    "type": "number",
+                    "description": "菜单类型"
+                  },
+                  "path": {
+                    "type": "string",
+                    "description": "路由路径"
+                  },
+                  "component": {
+                    "type": "string",
+                    "description": "组件路径"
+                  },
+                  "icon": {
+                    "type": "string",
+                    "description": "图标"
+                  },
+                  "sortOrder": {
+                    "type": "number",
+                    "description": "排序"
+                  },
+                  "visible": {
+                    "type": "number",
+                    "description": "是否可见"
+                  },
+                  "status": {
+                    "type": "number",
+                    "description": "状态"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/menu/deleteMenuById": {
+      "post": {
+        "tags": [
+          "菜单管理"
+        ],
+        "summary": "删除菜单",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "菜单ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/auth/getMenuTreeWithRole": {
+      "post": {
+        "tags": [
+          "权限管理"
+        ],
+        "summary": "获取角色菜单权限树",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "roleId"
+                ],
+                "properties": {
+                  "roleId": {
+                    "type": "string",
+                    "description": "角色ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/auth/getMenuTreeWithUser": {
+      "post": {
+        "tags": [
+          "权限管理"
+        ],
+        "summary": "获取用户菜单权限树",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "用户ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/manage/sys/auth/saveRoleMenu": {
+      "post": {
+        "tags": [
+          "权限管理"
+        ],
+        "summary": "保存角色菜单权限",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "roleId",
+                  "menuIds"
+                ],
+                "properties": {
+                  "roleId": {
+                    "type": "string",
+                    "description": "角色ID",
+                    "example": "507f1f77bcf86cd799439011"
+                  },
+                  "menuIds": {
+                    "type": "string",
+                    "description": "菜单ID列表，逗号分隔",
+                    "example": "id1,id2,id3"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "realName": {
+            "type": "string",
+            "example": "张三"
+          },
+          "email": {
+            "type": "string",
+            "example": "zhangsan@example.com"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "example": "https://example.com/avatar.jpg"
+          },
+          "status": {
+            "type": "number",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439012"
+                },
+                "roleName": {
+                  "type": "string",
+                  "example": "管理员"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UserList": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 100
+          }
+        }
+      },
+      "Role": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "roleName": {
+            "type": "string",
+            "example": "管理员"
+          },
+          "roleCode": {
+            "type": "string",
+            "example": "admin"
+          },
+          "description": {
+            "type": "string",
+            "example": "系统管理员"
+          },
+          "status": {
+            "type": "number",
+            "example": 1
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          }
+        }
+      },
+      "RoleList": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 10
+          }
+        }
+      },
+      "Menu": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "parentId": {},
+          "menuName": {
+            "type": "string",
+            "example": "系统管理"
+          },
+          "menuCode": {
+            "type": "string",
+            "example": "system"
+          },
+          "menuType": {
+            "type": "number",
+            "example": 1
+          },
+          "path": {
+            "type": "string",
+            "example": "/system"
+          },
+          "component": {
+            "type": "string",
+            "example": "Layout"
+          },
+          "icon": {
+            "type": "string",
+            "example": "SettingOutlined"
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 1
+          },
+          "visible": {
+            "type": "number",
+            "example": 1
+          },
+          "status": {
+            "type": "number",
+            "example": 1
+          },
+          "permissionCode": {
+            "type": "string",
+            "example": "system:view"
+          }
+        }
+      },
+      "MenuTree": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "parentId": {},
+          "menuName": {
+            "type": "string",
+            "example": "系统管理"
+          },
+          "src": {
+            "type": "string",
+            "example": "/system"
+          },
+          "seq": {
+            "type": "number",
+            "example": 1
+          },
+          "ck": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {}
+          },
+          "message": {
+            "type": "string",
+            "example": "操作成功"
+          }
+        }
+      }
+    }
+  }
+}
