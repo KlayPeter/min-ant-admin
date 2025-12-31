@@ -20,8 +20,6 @@ const OrgUser: React.FC = () => {
   const roleId = searchParams.get("roleId");
 
   const actionRef = useRef<ActionType>(null);
-  const [orgList, setOrgList] = useState<any[]>([]);
-  const [orgValueEnum, setOrgValueEnum] = useState({});
   const userModelRef = useRef<{ open: (values?: any, id?: number) => void }>(
     null
   );
@@ -52,157 +50,38 @@ const OrgUser: React.FC = () => {
     }));
   };
 
-  const initOrgList = useCallback(async () => {
-    try {
-      const res = await Apis.system.org.getSyncGridTree();
-      const treeList = Array.isArray(res) ? res : res?.data || [];
-
-      // 用于树形下拉选择
-      setOrgList(convertTreeForSelect(treeList));
-
-      // 用于表格列显示
-      setOrgValueEnum(buildValueEnum(treeList));
-    } catch (error) {
-      console.warn("获取组织架构失败，使用Mock数据:", error);
-      const mockOrgs = [
-        {
-          id: 1,
-          orgName: 'test',
-          parentId: 0,
-          seq: 1,
-          status: 1,
-          children: [
-            {
-              id: 11,
-              orgName: '测试部门A',
-              parentId: 1,
-              seq: 1,
-              status: 1
-            }
-          ]
-        },
-        {
-          id: 2,
-          orgName: '管理部门',
-          parentId: 0,
-          seq: 2,
-          status: 1,
-          children: []
-        }
-      ];
-      setOrgList(convertTreeForSelect(mockOrgs));
-      setOrgValueEnum(buildValueEnum(mockOrgs));
-    }
-  }, [buildValueEnum, convertTreeForSelect]);
 
   /**
    * 拿角色列表
    */
   const loadRoleList = useCallback(async () => {
-    try {
-      const res =
-        ((await Apis.system.user.getRoleList())
-          ?.data as unknown as Array<any>) || [];
-      // 按ID倒序排列
-      const sortedRes = [...res].sort((a, b) => b.id - a.id);
-      const editRoleList = sortedRes.map((item: any) => {
-        return {
-          ...item,
-          label: item.roleName,
-          value: item.id,
-        };
-      });
-      setEditRoleList(editRoleList);
-    } catch (error) {
-      console.warn("获取角色列表失败，使用Mock数据:", error);
-      const mockRoles = [
-        {
-          id: 1,
-          roleName: 'test123',
-          roleCode: 'test123',
-          remark: '测试角色',
-          status: 1,
-          label: 'test123',
-          value: 1
-        },
-        {
-          id: 2,
-          roleName: '管理员',
-          roleCode: 'admin',
-          remark: '系统管理员',
-          status: 1,
-          label: '管理员',
-          value: 2
-        }
-      ];
-      setEditRoleList(mockRoles);
-    }
+    const res = await Apis.system.user.getRoleList();
+    
+    const roleList = res || [];
+    const sortedRes = [...roleList].sort((a, b) => b.id.localeCompare(a.id));
+    const editRoleList = sortedRes.map((item: any) => ({
+      ...item,
+      label: item.roleName,
+      value: item.id,
+    }));
+    setEditRoleList(editRoleList);
   }, []);
 
   const getUserList = async (params: any) => {
-    try {
-      const res = (await Apis.system.user.getUserList(
-        params
-      )) as unknown as any;
-      return {
-        data: res.data.rows,
-        success: true,
-        total: res.data.total,
-      };
-    } catch (error) {
-      console.warn("获取用户列表失败，使用Mock数据:", error);
-      const mockUsers = [
-        {
-          userId: 1,
-          id: 1,
-          userName: '123xiaohuihui@qq.com',
-          realName: '123',
-          email: '123xiaohuihui@qq.com',
-          phone: '13800138000',
-          mobilePhone: '13800138000',
-          status: 1,
-          createTime: '2025-12-15 19:31:10',
-          orgId: 1,
-          orgName: 'test',
-          roleId: 1,
-          roles: [{ roleId: 1, id: 1, roleName: 'test123' }]
-        },
-        {
-          userId: 2,
-          id: 2,
-          userName: 'admin',
-          realName: '管理员',
-          email: 'admin@example.com',
-          phone: '13800138001',
-          mobilePhone: '13800138001',
-          status: 1,
-          createTime: '2025-12-14 10:00:00',
-          orgId: 2,
-          orgName: '管理部门',
-          roleId: 2,
-          roles: [{ roleId: 2, id: 2, roleName: '管理员' }]
-        }
-      ];
-      
-      return {
-        data: mockUsers,
-        success: true,
-        total: mockUsers.length,
-      };
-    }
+    const res = await Apis.system.user.getUserList(params);
+    return {
+      data: res.rows,
+      success: true,
+      total: res.total,
+    };
   };
 
   const clickUpdateUserStatus = async (id: number, status: number) => {
-    try {
-      await Apis.system.user.changeUserStatus({
-        id,
-        status,
-      });
-      message.success("操作成功");
-    } catch (error) {
-      console.warn("更新用户状态失败，模拟成功:", error);
-      message.success("操作成功");
-    }
+    await Apis.system.user.changeUserStatus({
+      userId: String(id),
+      status,
+    });
+    message.success("操作成功");
   };
 
   const handleForceChangePassword = (record: any) => {
@@ -289,7 +168,7 @@ const OrgUser: React.FC = () => {
     // 使用 setTimeout 来避免同步调用 setState
     const initializeData = async () => {
       try {
-        await Promise.all([loadRoleList(), initOrgList()]);
+        await loadRoleList()
         
         const userInfo = storage.get("userInfo");
         if (userInfo) {
@@ -328,7 +207,7 @@ const OrgUser: React.FC = () => {
   const columns: ProColumns[] = [
     {
       title: "账户",
-      dataIndex: "userName",
+      dataIndex: "email",
       align: "center",
       hideInSearch: false,
     },
@@ -337,20 +216,6 @@ const OrgUser: React.FC = () => {
       dataIndex: "realName",
       align: "center",
       hideInSearch: false,
-    },
-    {
-      title: "部门",
-      dataIndex: "orgId",
-      align: "center",
-      valueType: "treeSelect",
-      fieldProps: {
-        treeData: orgList,
-        placeholder: "请选择部门",
-        allowClear: true,
-        showSearch: true,
-        treeNodeFilterProp: "label",
-      },
-      valueEnum: orgValueEnum,
     },
     {
       title: "角色",
@@ -406,14 +271,14 @@ const OrgUser: React.FC = () => {
     },
     {
       title: "创建时间",
-      dataIndex: "createTime",
+      dataIndex: "createdAt",
       align: "center",
       valueType: "index",
       hideInSearch: true,
       render: (_, item) => (
         <div style={{ display: "flex", justifyContent: "center" }}>
           {/* 添加此div */}
-          {item.createTime}
+          {item.createdAt}
         </div>
       ),
     },
@@ -482,11 +347,10 @@ const OrgUser: React.FC = () => {
           };
 
           // 只添加非空的搜索条件
-          if (params["userName"])
-            requestParams.userNameLike = params["userName"];
+          if (params["email"])
+            requestParams.emailLike = params["email"];
           if (params["realName"])
             requestParams.realNameLike = params["realName"];
-          if (params["orgId"]) requestParams.orgId = params["orgId"];
           if (
             params["status"] !== undefined &&
             params["status"] !== null &&

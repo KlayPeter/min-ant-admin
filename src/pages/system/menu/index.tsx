@@ -12,65 +12,7 @@ import Apis from "@/apis";
 import { useListRefresh } from "@/hooks";
 import { EVENT_KEY } from "@/constants";
 import MenuModel from "./components/Model";
-
-// Mock数据
-const mockMenus = [
-  {
-    id: 1,
-    menuName: '信息管理平台',
-    menuCode: 'system',
-    src: '/',
-    path: '/',
-    parentId: 0,
-    seq: 1,
-    type: 1,
-    children: [
-      {
-        id: 2,
-        menuName: '首页',
-        menuCode: 'dashboard',
-        src: '/',
-        path: '/',
-        parentId: 1,
-        seq: 1,
-        type: 1
-      }
-    ]
-  },
-  {
-    id: 3,
-    menuName: '通用管理',
-    menuCode: 'common',
-    src: 'common',
-    path: '/common',
-    parentId: 0,
-    seq: 2,
-    type: 1,
-    children: []
-  },
-  {
-    id: 4,
-    menuName: '媒体管理',
-    menuCode: 'media',
-    src: 'media',
-    path: '/media',
-    parentId: 0,
-    seq: 3,
-    type: 1,
-    children: []
-  },
-  {
-    id: 5,
-    menuName: '广告管理',
-    menuCode: 'advertisement',
-    src: 'advertisement',
-    path: '/advertisement',
-    parentId: 0,
-    seq: 4,
-    type: 1,
-    children: []
-  }
-];
+import { buildTree } from "@/utils/tree";
 
 const Menu: React.FC = () => {
   const [menuTree, setMenuTree] = useState<any>();
@@ -80,14 +22,15 @@ const Menu: React.FC = () => {
   );
 
   const loadMenu = async () => {
-    try {
-      const res = await Apis.system.menu.getMenuTree();
-      setMenuTree(res.data);
-    } catch (error) {
-      console.warn("接口调用失败，使用Mock数据:", error);
-      // 接口报错时使用mock数据
-      setMenuTree(mockMenus);
-    }
+    const res= await Apis.system.menu.getMenuTree() as any;
+    const mappedData = (res || []).map((item: any) => ({
+      ...item,
+      src: item.path,
+      seq: item.sortOrder
+    }));
+    // 构建树结构
+    const treeData = buildTree(mappedData);
+    setMenuTree(treeData);
   };
 
   const confirm = (record: any) => {
@@ -114,22 +57,15 @@ const Menu: React.FC = () => {
   };
 
   const handleSave = async (values: any, id?: number) => {
-    try {
-      const apiMethod = id
-        ? Apis.system.menu.editMenuTree
-        : Apis.system.menu.addMenuTree;
-      const submitData = id
-        ? { ...values, id }
-        : { ...values, levelNum: 0, type: 1, iconUrl: "" };
-      await apiMethod(submitData);
-      message.success(`${id ? "编辑" : "新增"}成功`);
-      await loadMenu();
-    } catch (error) {
-      console.warn("接口调用失败，模拟成功响应:", error);
-      message.success(`${id ? "编辑" : "新增"}成功`);
-      // 接口失败时重新加载数据（会使用mock数据）
-      await loadMenu();
-    }
+    const apiMethod = id
+      ? Apis.system.menu.editMenuTree
+      : Apis.system.menu.addMenuTree;
+    const submitData = id
+      ? { ...values, id }
+      : { ...values, levelNum: 0, type: 1, iconUrl: "" };
+    await apiMethod(submitData);
+    message.success(`${id ? "编辑" : "新增"}成功`);
+    await loadMenu();
   };
 
   // 获取当前菜单名称

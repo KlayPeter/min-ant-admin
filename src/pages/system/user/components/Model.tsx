@@ -1,4 +1,4 @@
-import { ProForm, ProFormSelect, ProFormText, ProFormTreeSelect } from "@ant-design/pro-components";
+import { ProForm, ProFormSelect, ProFormText } from "@ant-design/pro-components";
 import type { ProFormInstance } from "@ant-design/pro-components";
 import { Card, Modal } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState, useCallback, useEffect } from "react";
@@ -11,7 +11,6 @@ const UserModel = forwardRef<
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<number>();
   const [roleList, setRoleList] = useState<any[]>([]);
-  const [orgList, setOrgList] = useState<any[]>([]);
   const formRef = useRef<ProFormInstance>(null);
   const [id, setId] = useState<number>();
 
@@ -19,8 +18,9 @@ const UserModel = forwardRef<
    * 拿角色列表
    */
   const loadRoleList = useCallback(async () => {
-    const res = await Apis.system.user.getRoleList();
-    const roleList = res?.data?.map((item: any) => {
+    const res = await Apis.system.user.getRoleList()as any;
+    
+    const roleList = (res || []).map((item: any) => {
       return {
         ...item,
         label: item.roleName,
@@ -30,27 +30,9 @@ const UserModel = forwardRef<
     setRoleList(roleList);
   }, []);
 
-  const initOrgList = useCallback(async () => {
-    // 转换树形数据供 TreeSelect 使用
-    const convertTreeForSelect = (data: any[]): any[] => {
-      return data.map(item => ({
-        label: item.orgName || item.text,
-        value: item.id,
-        children: item.children?.length > 0 ? convertTreeForSelect(item.children) : undefined,
-      }));
-    };
-
-    try {
-      const res = await Apis.system.org.getSyncGridTree();
-      const treeList = Array.isArray(res) ? res : res?.data || [];
-      setOrgList(convertTreeForSelect(treeList));
-    } catch (error) { }
-  }, []);
-
   useEffect(() => {
     if (open) {
       loadRoleList();
-      initOrgList();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -64,12 +46,6 @@ const UserModel = forwardRef<
   const handleOk = () => {
     return formRef.current?.validateFields()
       .then(values => {
-        // 处理提交数据
-        const orgId = values.orgId;
-        let orgName;
-        if (orgId) {
-          orgName = orgList.find((e) => e.value === orgId)?.label;
-        }
 
         const { roleId, ...restValues } = values;
 
@@ -83,7 +59,6 @@ const UserModel = forwardRef<
 
         const submitData = {
           ...filteredValues,
-          orgName: orgName,
           id,
           roleIds: roleId && Array.isArray(roleId) ? roleId : [],
         };
@@ -127,7 +102,7 @@ const UserModel = forwardRef<
       >
         <Card>
           <ProFormText
-            name="userName"
+            name="email"
             label="账户"
             required
             rules={[
@@ -144,19 +119,6 @@ const UserModel = forwardRef<
             label="姓名"
             required
             rules={[{ required: true, message: '请输入姓名' }]}
-          />
-          <ProFormTreeSelect
-            name="orgId"
-            label="部门"
-            required
-            rules={[{ required: true, message: '请选择部门' }]}
-            fieldProps={{
-              treeData: orgList,
-              placeholder: '请选择部门',
-              allowClear: true,
-              showSearch: true,
-              treeNodeFilterProp: 'label',
-            }}
           />
           <ProFormSelect
             name="roleId"

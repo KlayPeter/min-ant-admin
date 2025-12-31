@@ -278,8 +278,9 @@ export default () => {
       if (params && params['roleId']) {
         setCurrRoleId(params['roleId']);
         const res = await Apis.system.auth.getMenuTreeWithRole(params);
-        initCheckMenuList(res.data);
-        return res;
+        
+        initCheckMenuList(res || []);
+        return { data: res || [] };
       } else {
         setSelectedRowKeys([]);
         return { data: [] };

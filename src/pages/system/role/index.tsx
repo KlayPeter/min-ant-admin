@@ -40,15 +40,9 @@ const OrgUser: React.FC = () => {
       okText: "确认",
       cancelText: "取消",
       onOk: async () => {
-        try {
-          await Apis.system.role.deleteRole({ id: record["id"] });
-          message.success("操作成功");
-          actionRef.current?.reload();
-        } catch (e) {
-          console.warn("删除角色接口失败，模拟成功:", e);
-          message.success("操作成功");
-          actionRef.current?.reload();
-        }
+        await Apis.system.role.deleteRole({ id: record["id"] });
+        message.success("操作成功");
+        actionRef.current?.reload();
       },
     });
   };
@@ -59,23 +53,15 @@ const OrgUser: React.FC = () => {
     userObjects: any[],
     allUser: any[]
   ) => {
-    try {
-      const userId = allUser
-        .filter((user) => !userObjects.includes(user.key))
-        .map((user) => user.key)
-        .join(",");
-      console.log(userId, "userId");
+    const userId = allUser
+      .filter((user) => !userObjects.includes(user.key))
+      .map((user) => user.key)
+      .join(",");
 
-      await Apis.system.role.UpdateRoleUserList({ roleId, userIds: userId });
-      message.success("操作成功");
-      setUserListModalVisible(false);
-      actionRef.current?.reload();
-    } catch (error) {
-      console.warn("更新角色用户失败，模拟成功:", error);
-      message.success("操作成功");
-      setUserListModalVisible(false);
-      actionRef.current?.reload();
-    }
+    await Apis.system.role.UpdateRoleUserList({ roleId, userIds: userId });
+    message.success("操作成功");
+    setUserListModalVisible(false);
+    actionRef.current?.reload();
   };
 
   // 检查是否有变更
@@ -126,7 +112,7 @@ const OrgUser: React.FC = () => {
     {
       title: "备注",
       hideInSearch: true,
-      dataIndex: "remark",
+      dataIndex: "description",
       align: "center",
     },
     {
@@ -135,7 +121,7 @@ const OrgUser: React.FC = () => {
       valueType: "option",
       align: "center",
       fixed: "right",
-      width: 350,
+      width: 200,
       render: (_, record) => (
         <Space>
           <Button
@@ -143,62 +129,33 @@ const OrgUser: React.FC = () => {
             type="link"
             onClick={async () => {
               setCurrentRole(record);
-              try {
-                const res:any = await Apis.system.role.getRoleUserList({
-                  roleId: record["id"],
-                });
-                const includeUsers = (res?.includeList || [])
-                  .map((item: any) => ({
-                    key: String(item.userId),
-                    title: String(item.realName ?? ""),
-                  }))
-                  .filter(
-                    (user: any, index: number, self: any[]) =>
-                      index === self.findIndex((u: any) => u.key === user.key)
-                  );
-                const excludeUsers = (res?.excludeList || [])
-                  .map((item: any) => ({
-                    key: String(item.userId),
-                    title: String(item.realName ?? ""),
-                  }))
-                  .filter(
-                    (user: any, index: number, self: any[]) =>
-                      index === self.findIndex((u: any) => u.key === user.key)
-                  );
-
-                setTransferData([...includeUsers, ...excludeUsers]);
-                const initialTargetKeys = excludeUsers.map((user: any) => user.key);
-                setTargetKeys(initialTargetKeys);
-                setOriginalTargetKeys(initialTargetKeys);
-                setUserListModalVisible(true);
-              } catch (error) {
-                console.warn("获取角色用户列表失败，使用Mock数据:", error);
-                // 使用Mock数据
-                const mockData = {
-                  includeList: [
-                    { userId: 1, realName: '张三', userName: 'zhangsan' },
-                    { userId: 2, realName: '李四', userName: 'lisi' }
-                  ],
-                  excludeList: [
-                    { userId: 3, realName: '王五', userName: 'wangwu' },
-                    { userId: 4, realName: '赵六', userName: 'zhaoliu' }
-                  ]
-                };
-                const includeUsers = mockData.includeList.map((item: any) => ({
+              const res:any = await Apis.system.role.getRoleUserList({
+                roleId: record["id"],
+              });
+              const includeUsers = (res?.includeList || [])
+                .map((item: any) => ({
                   key: String(item.userId),
-                  title: String(item.realName),
-                }));
-                const excludeUsers = mockData.excludeList.map((item: any) => ({
+                  title: String(item.realName ?? ""),
+                }))
+                .filter(
+                  (user: any, index: number, self: any[]) =>
+                    index === self.findIndex((u: any) => u.key === user.key)
+                );
+              const excludeUsers = (res?.excludeList || [])
+                .map((item: any) => ({
                   key: String(item.userId),
-                  title: String(item.realName),
-                }));
+                  title: String(item.realName ?? ""),
+                }))
+                .filter(
+                  (user: any, index: number, self: any[]) =>
+                    index === self.findIndex((u: any) => u.key === user.key)
+                );
 
-                setTransferData([...includeUsers, ...excludeUsers]);
-                const initialTargetKeys = excludeUsers.map((user: any) => user.key);
-                setTargetKeys(initialTargetKeys);
-                setOriginalTargetKeys(initialTargetKeys);
-                setUserListModalVisible(true);
-              }
+              setTransferData([...includeUsers, ...excludeUsers]);
+              const initialTargetKeys = excludeUsers.map((user: any) => user.key);
+              setTargetKeys(initialTargetKeys);
+              setOriginalTargetKeys(initialTargetKeys);
+              setUserListModalVisible(true);
             }}
             size="small"
           >
@@ -258,14 +215,16 @@ const OrgUser: React.FC = () => {
             新建
           </Button>,
         ]}
-        request={async () => {
-          const res: any = await Apis.system.role.getRoleAdminList();
-          const temp = {
-            data: res.data ?? [],
-            total: res.data?.length ?? 0,
+        request={async (params) => {
+          const res: any = await Apis.system.role.getRoleAdminList({
+            page: params.current,
+            rows: params.pageSize,
+          });
+          return {
+            data: res.rows ?? [],
+            total: res.total ?? 0,
             success: true,
           };
-          return temp;
         }}
         columns={columns}
         sticky={{
