@@ -5,13 +5,14 @@ import type {
   ProFormInstance,
 } from "@ant-design/pro-components";
 import { ProTable } from "@ant-design/pro-components";
-import { Button, message, Modal, Space, Transfer } from "antd";
+import { Button, Modal, Space, Transfer } from "antd";
 import React, { useRef, useState } from "react";
 import Apis from "@/apis";
 import { PageContent } from "@/components/base";
 import { useListRefresh } from "@/hooks";
 import { EVENT_KEY } from "@/constants";
 import RoleModel from "./components/Model";
+import message from "@/utils/message";
 
 const OrgUser: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
@@ -58,7 +59,7 @@ const OrgUser: React.FC = () => {
       .map((user) => user.key)
       .join(",");
 
-    await Apis.system.role.UpdateRoleUserList({ roleId, userIds: userId });
+    await Apis.system.role.updateRoleUserList({ roleId, userIds: userId });
     message.success("操作成功");
     setUserListModalVisible(false);
     actionRef.current?.reload();
@@ -79,35 +80,55 @@ const OrgUser: React.FC = () => {
     actionRef.current?.reload();
   };
 
+  const getRoleList = async (params: any) => {
+    try {
+      const res: any = await Apis.system.role.getRoleList({
+        page: params.current,
+        rows: params.pageSize,
+      });
+      return {
+        data: res.rows ?? [],
+        total: res.total ?? 0,
+        success: true,
+      };
+    } catch (e) {
+      return {
+        data: [],
+        total: 0,
+        success: true,
+      };
+    }
+  };
+
   const columns: ProColumns[] = [
     {
       title: "角色名称",
       dataIndex: "roleName",
       align: "center",
-      valueType: "select",
-      request: async () => {
-        try {
-          const res: any = await Apis.system.role.getRoleAdminList();
-          const tempList = res?.data ?? [];
-          return tempList.map((item: any) => ({
-            label: item.roleName,
-            value: item.id,
-          }));
-        } catch (e) {
-          return [];
-        }
-      },
-      fieldProps: {
-        showSearch: true,
-        filterOption: (input: string, option: any) =>
-          (option?.label ?? option?.text ?? "")
-            .toLowerCase()
-            .includes(input.toLowerCase()),
-        onChange: () => {
-          // 手动触发表单提交，确保选择的值立即传递到接口
-          formRef.current?.submit();
-        },
-      },
+      valueType: "text",
+      // request: async () => {
+      //   try {
+      //     const res: any = await Apis.system.role.getRoleAdminList();
+      //     const tempList = res?.data ?? [];
+      //     return tempList.map((item: any) => ({
+      //       label: item.roleName,
+      //       value: item.id,
+      //     }));
+      //   } catch (e) {
+      //     return [];
+      //   }
+      // },
+      // fieldProps: {
+      //   showSearch: true,
+      //   filterOption: (input: string, option: any) =>
+      //     (option?.label ?? option?.text ?? "")
+      //       .toLowerCase()
+      //       .includes(input.toLowerCase()),
+      //   onChange: () => {
+      //     // 手动触发表单提交，确保选择的值立即传递到接口
+      //     formRef.current?.submit();
+      //   },
+      // },
     },
     {
       title: "备注",
@@ -129,13 +150,13 @@ const OrgUser: React.FC = () => {
             type="link"
             onClick={async () => {
               setCurrentRole(record);
-              const res:any = await Apis.system.role.getRoleUserList({
+              const res: any = await Apis.system.role.getRoleUserList({
                 roleId: record["id"],
               });
               const includeUsers = (res?.includeList || [])
                 .map((item: any) => ({
                   key: String(item.userId),
-                  title: String(item.realName ?? ""),
+                  title: String(item.nickname || item.username || ""),
                 }))
                 .filter(
                   (user: any, index: number, self: any[]) =>
@@ -144,7 +165,7 @@ const OrgUser: React.FC = () => {
               const excludeUsers = (res?.excludeList || [])
                 .map((item: any) => ({
                   key: String(item.userId),
-                  title: String(item.realName ?? ""),
+                  title: String(item.nickname || item.username || ""),
                 }))
                 .filter(
                   (user: any, index: number, self: any[]) =>
@@ -199,10 +220,6 @@ const OrgUser: React.FC = () => {
         actionRef={actionRef}
         formRef={formRef}
         rowKey="id"
-        search={{
-          labelWidth: "auto",
-          optionRender: false,
-        }}
         toolBarRender={() => [
           <Button
             type="primary"
@@ -215,17 +232,7 @@ const OrgUser: React.FC = () => {
             新建
           </Button>,
         ]}
-        request={async (params) => {
-          const res: any = await Apis.system.role.getRoleAdminList({
-            page: params.current,
-            rows: params.pageSize,
-          });
-          return {
-            data: res.rows ?? [],
-            total: res.total ?? 0,
-            success: true,
-          };
-        }}
+        request={getRoleList}
         columns={columns}
         sticky={{
           offsetHeader: 0,

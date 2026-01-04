@@ -22,12 +22,12 @@ const MenuModel = forwardRef<
         // 为当前节点添加label和value字段
         const enhancedNode = {
           ...node,
-          label: node.menuName,
+          label: node.name,
           value: node.id,
         };
 
         // 如果当前节点有子节点，递归处理这些子节点
-        if (node.children) {
+        if (node.children && node.children.length > 0) {
           enhancedNode.children = recursiveEnhance(node.children);
         }
 
@@ -40,10 +40,34 @@ const MenuModel = forwardRef<
 
   const loadMenu = async () => {
     try {
-      const res = await Apis.system.menu.getMenuTree();
-      const flatMenuTree = enhanceMenuTree(res.data);
+      const res: any = await Apis.system.menu.getMenuTree();
+      console.log('原始菜单数据:', res);
+
+      // 先构建树形结构
+      const buildTree = (items: any[], parentId: string | null = null): any[] => {
+        return items
+          .filter((item) => {
+            // 如果 parentId 为 null，匹配所有没有 parentId 或 parentId 为 null/undefined 的项
+            if (parentId === null) {
+              return !item.parentId || item.parentId === null || item.parentId === undefined;
+            }
+            // 否则精确匹配 parentId
+            return item.parentId === parentId;
+          })
+          .map((item) => ({
+            ...item,
+            children: buildTree(items, item.id),
+          }));
+      };
+
+      const treeData = buildTree(res);
+      console.log('构建的树形数据:', treeData);
+
+      const flatMenuTree = enhanceMenuTree(treeData);
+      console.log('增强后的树形菜单数据:', flatMenuTree);
       return flatMenuTree;
     } catch (error) {
+      console.error('加载菜单失败:', error);
       return [];
     }
   };
@@ -87,29 +111,39 @@ const MenuModel = forwardRef<
       >
         <Card>
           <ProFormText
-            name="seq"
-            label="排序"
-            rules={[{ required: true, message: "请输入序号" }]}
-          />
-
-          <ProFormText
-            name="menuName"
+            name="name"
             label="菜单名称"
             rules={[{ required: true, message: "请输入菜单名称" }]}
           />
 
           <ProFormText
-            name="src"
-            label="菜单编码"
-            rules={[{ required: true, message: "请输入菜单编码" }]}
+            name="path"
+            label="路径"
+            rules={[{ required: true, message: "请输入路径" }]}
+          />
+
+          <ProFormText
+            name="component"
+            label="组件路径"
+            placeholder="如: pages/system/user"
+          />
+
+          <ProFormText
+            name="icon"
+            label="图标"
+            placeholder="如: UserOutlined"
+          />
+
+          <ProFormText
+            name="sortOrder"
+            label="排序"
+            rules={[{ required: true, message: "请输入序号" }]}
           />
 
           <ProFormTreeSelect
             name={"parentId"}
             label="父级菜单"
-            // @ts-ignore
             request={loadMenu}
-            rules={[{ required: true, message: "请选择父级菜单" }]}
             fieldProps={{
               allowClear: true,
               placeholder: "请选择父级菜单",

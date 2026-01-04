@@ -4,54 +4,60 @@ import {
   ProFormText,
 } from "@ant-design/pro-components";
 import logo from "@/assets/logo.png";
-import { Tabs, message } from "antd";
+import { Tabs, message as antdMessage } from "antd";
 import { useDeviceWidth } from "@/hooks";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { useCallback } from "react";
-import md5 from "blueimp-md5-es6/js/md5";
+import Apis from "@/apis";
+import storage from "@/utils/storage";
+
 const Page = () => {
   const { isSmallDevice } = useDeviceWidth();
+  const [loading, setLoading] = useState(false);
+
   type LoginType = "account";
   const [loginType, setLoginType] = useState<LoginType>("account");
 
   const handleSubmit = useCallback(
     async (values: { username: string; password: string }) => {
       try {
-        // 登录逻辑
-        const requestBody = {
+        setLoading(true);
+
+        // 调用登录接口
+        // 注意：request工具会自动解包响应，直接返回data部分
+        const userData = (await Apis.system.login({
           username: values.username,
-          password: md5(values.password), // 使用md5加密密码
-        };
+          password: values.password,
+        })) as any;
 
-        // 使用本地模拟登录提交
-        const validUser = "mmx";
-        const validPassword = md5("123456");
+        console.log("登录响应(已解包):", userData);
 
-        if (
-          requestBody.username === validUser &&
-          requestBody.password === validPassword
-        ) {
-          // 模拟 token
-          const fakeToken = "fake-jwt-token-" + Date.now();
+        // 存储用户信息和token
+        storage.set("userInfo", userData);
+        storage.set("token", `token-${Date.now()}`);
 
-          // 存储 token 和用户名
-          localStorage.setItem("token", fakeToken);
-          localStorage.setItem("username", requestBody.username);
+        console.log("登录成功，用户信息已存储");
 
-          message.success("登录成功");
-          window.location.href = "/"; // 跳转首页
-        } else {
-          message.error("账号或密码错误");
-        }
-      } catch (error) {}
+        antdMessage.success("登录成功，正在跳转...");
+
+        // 跳转到首页（菜单会在 BasicLayout 中自动获取）
+        setTimeout(() => {
+          console.log("开始跳转到首页...");
+          window.location.href = "/";
+        }, 800);
+      } catch (error: any) {
+        console.error("登录失败:", error);
+        antdMessage.error(error?.message || "登录失败，请检查网络连接");
+      } finally {
+        setLoading(false);
+      }
     },
     []
   );
+
   const onFinish = useCallback(
     async (values: { username: string; password: string }) => {
       await handleSubmit(values);
-      message.success("登录成功");
     },
     [handleSubmit]
   );
@@ -68,9 +74,9 @@ const Page = () => {
         logo={logo}
         {...(!isSmallDevice
           ? {
-              backgroundVideoUrl:
-                "https://gw.alipayobjects.com/v/huamei_gcee1x/afts/video/jXRBRK_VAwoAAAAAAAAAAAAAK4eUAQBr",
-            }
+            backgroundVideoUrl:
+              "https://gw.alipayobjects.com/v/huamei_gcee1x/afts/video/jXRBRK_VAwoAAAAAAAAAAAAAK4eUAQBr",
+          }
           : {})}
         title="Manxiang"
         containerStyle={{
@@ -80,6 +86,18 @@ const Page = () => {
         }}
         subTitle="慢慢生活-慢慢想象"
         onFinish={onFinish}
+        submitter={{
+          searchConfig: {
+            submitText: "登录",
+          },
+          submitButtonProps: {
+            loading: loading,
+            size: "large",
+            style: {
+              width: "100%",
+            },
+          },
+        }}
       >
         <Tabs
           centered
@@ -105,7 +123,7 @@ const Page = () => {
                 },
               ]}
             />
-            <ProFormText
+            <ProFormText.Password
               name="password"
               label="密码"
               placeholder="请输入密码"
@@ -122,6 +140,11 @@ const Page = () => {
             />
           </>
         )}
+        <div style={{ marginTop: 16, color: "#999", fontSize: 12 }}>
+          <div>测试账号：</div>
+          <div>超级管理员 - 用户名: admin 密码: admin123</div>
+          <div>管理员 - 用户名: manager 密码: admin123</div>
+        </div>
       </LoginFormPage>
     </div>
   );
@@ -134,4 +157,5 @@ const Login: React.FC = () => {
     </ProConfigProvider>
   );
 };
+
 export default Login;

@@ -5,21 +5,20 @@ import { forwardRef, useImperativeHandle, useRef, useState, useCallback, useEffe
 import Apis from '@/apis';
 
 const UserModel = forwardRef<
-  { open: (values?: any, id?: number) => void },
-  { onFinish: (values: any, id?: number) => void }
+  { open: (values?: any, id?: string) => void },
+  { onFinish: (values: any, id?: string) => void }
 >(({ onFinish }, ref) => {
   const [open, setOpen] = useState(false);
-  const [editId, setEditId] = useState<number>();
+  const [editId, setEditId] = useState<string>();
   const [roleList, setRoleList] = useState<any[]>([]);
   const formRef = useRef<ProFormInstance>(null);
-  const [id, setId] = useState<number>();
 
   /**
    * 拿角色列表
    */
   const loadRoleList = useCallback(async () => {
-    const res = await Apis.system.user.getRoleList()as any;
-    
+    const res = await Apis.system.user.getRoleList() as any;
+
     const roleList = (res || []).map((item: any) => {
       return {
         ...item,
@@ -59,7 +58,7 @@ const UserModel = forwardRef<
 
         const submitData = {
           ...filteredValues,
-          id,
+          id: editId,
           roleIds: roleId && Array.isArray(roleId) ? roleId : [],
         };
 
@@ -69,7 +68,7 @@ const UserModel = forwardRef<
   };
 
   useImperativeHandle(ref, () => ({
-    open: (values?: any, id?: number) => {
+    open: (values?: any, id?: string) => {
       setEditId(id);
       setOpen(true);
       if (values) {
@@ -77,10 +76,9 @@ const UserModel = forwardRef<
           // 处理编辑时的数据回填
           const formValues = { ...values };
           if (values.roles && Array.isArray(values.roles)) {
-            formValues.roleId = values.roles.map((role: any) => role.roleId || role.id);
+            formValues.roleId = values.roles.map((role: any) => role.id);
           }
           formRef.current?.setFieldsValue(formValues);
-          setId(values.id);
         }, 0);
       }
     }
@@ -102,23 +100,19 @@ const UserModel = forwardRef<
       >
         <Card>
           <ProFormText
-            name="email"
-            label="账户"
+            name="username"
+            label="用户名"
             required
             rules={[
-              { required: true, message: '请输入邮箱地址' },
-              ...(editId ? [] : [{
-                pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                message: '请输入正确的邮箱格式'
-              }])
+              { required: true, message: '请输入用户名' },
             ]}
-            disabled={!!editId} // 编辑时禁用账户名修改
+            disabled={!!editId}
           />
           <ProFormText
-            name="realName"
-            label="姓名"
+            name="nickname"
+            label="昵称"
             required
-            rules={[{ required: true, message: '请输入姓名' }]}
+            rules={[{ required: true, message: '请输入昵称' }]}
           />
           <ProFormSelect
             name="roleId"
@@ -134,7 +128,7 @@ const UserModel = forwardRef<
           {!editId && (
             <>
               <ProFormText.Password
-                name="pwd"
+                name="password"
                 label="密码"
                 required
                 rules={[
@@ -143,13 +137,13 @@ const UserModel = forwardRef<
                     message: '密码为必填项',
                   },
                   {
-                    pattern: /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{6,18}$/,
-                    message: '密码长度为6-18位,必须由字母、数字、特殊字符组成',
+                    min: 6,
+                    message: '密码长度至少6位',
                   },
                 ]}
               />
               <ProFormText.Password
-                name="confirmPwd"
+                name="confirmPassword"
                 label="确认密码"
                 required
                 rules={[
@@ -159,7 +153,7 @@ const UserModel = forwardRef<
                   },
                   ({ getFieldValue }) => ({
                     validator(_: any, value: any) {
-                      if (!value || getFieldValue('pwd') === value) {
+                      if (!value || getFieldValue('password') === value) {
                         return Promise.resolve();
                       }
                       return Promise.reject(new Error('两次密码不一致'));

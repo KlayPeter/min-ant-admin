@@ -1,6 +1,6 @@
 import { type ProColumns, ProTable } from "@ant-design/pro-components";
 import { useEffect, useState, useRef } from "react";
-import { Button, Modal, Space, message } from "antd";
+import { Button, Modal, Space } from "antd";
 import {
   ExclamationCircleOutlined,
   PlusOutlined,
@@ -13,6 +13,7 @@ import { useListRefresh } from "@/hooks";
 import { EVENT_KEY } from "@/constants";
 import MenuModel from "./components/Model";
 import { buildTree } from "@/utils/tree";
+import message from "@/utils/message";
 
 const Menu: React.FC = () => {
   const [menuTree, setMenuTree] = useState<any>();
@@ -22,7 +23,7 @@ const Menu: React.FC = () => {
   );
 
   const loadMenu = async () => {
-    const res= await Apis.system.menu.getMenuTree() as any;
+    const res = await Apis.system.menu.getMenuTree() as any;
     const mappedData = (res || []).map((item: any) => ({
       ...item,
       src: item.path,
@@ -39,30 +40,30 @@ const Menu: React.FC = () => {
       icon: <ExclamationCircleOutlined />,
       content: (
         <span>
-          确定要删除菜单"<strong>{record.menuName}</strong>"吗？
+          确定要删除菜单"<strong>{record.name}</strong>"吗？
         </span>
       ),
       okText: "确认",
       cancelText: "取消",
       onOk: async () => {
         try {
-          await Apis.system.menu.deleteMenuById({
+          await Apis.system.menu.deleteMenu({
             id: record["id"],
           });
           message.success("操作成功");
           await loadMenu();
-        } catch (e) {}
+        } catch (e) { }
       },
     });
   };
 
   const handleSave = async (values: any, id?: number) => {
     const apiMethod = id
-      ? Apis.system.menu.editMenuTree
-      : Apis.system.menu.addMenuTree;
+      ? Apis.system.menu.editMenu
+      : Apis.system.menu.addMenu;
     const submitData = id
       ? { ...values, id }
-      : { ...values, levelNum: 0, type: 1, iconUrl: "" };
+      : { ...values, type: 2 };
     await apiMethod(submitData);
     message.success(`${id ? "编辑" : "新增"}成功`);
     await loadMenu();
@@ -70,31 +71,29 @@ const Menu: React.FC = () => {
 
   // 获取当前菜单名称
   const buildMenuPath = (record: any): string => {
-    return record.menuName || "";
+    return record.name || "";
   };
 
   const columns: ProColumns<any>[] = [
     {
       title: "菜单名称",
-      dataIndex: "menuName",
+      dataIndex: "name",
       hideInSearch: true,
       align: "left",
       render: (_: any, record: any) => buildMenuPath(record),
     },
     {
-      title: "菜单编码",
-      dataIndex: "src",
+      title: "路径",
+      dataIndex: "path",
       align: "center",
-
       hideInSearch: true,
     },
     {
       title: "排序",
-      dataIndex: "seq",
+      dataIndex: "sortOrder",
       align: "center",
       hideInSearch: true,
     },
-
     {
       title: "操作",
       dataIndex: "operation",

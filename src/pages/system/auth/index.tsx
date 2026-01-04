@@ -2,9 +2,10 @@ import { ProTable } from '@ant-design/pro-components';
 import Apis from '@/apis';
 import React, { useEffect, useState } from 'react';
 import type { ProColumns } from '@ant-design/pro-table/es/typing';
-import { Button, message, Radio, Select } from 'antd';
+import { Button, Radio, Select } from 'antd';
 import { SaveOutlined, MinusSquareOutlined, PlusSquareOutlined } from '@ant-design/icons';
 import { PageContent } from '@/components';
+import message from '@/utils/message';
 
 export default () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>();
@@ -20,8 +21,8 @@ export default () => {
    */
   const loadRoleAdminList = async () => {
     try {
-      const res = await Apis.system.role.getRoleAdminList();
-      const roles = res?.data ?? [];
+      const res = await Apis.system.role.getRoleList({ rows: 999 }) as any;
+      const roles = res?.rows ?? [];
       const transformedObject = roles.map((item: any) => ({
         ...item,
         label: item.roleName,
@@ -40,12 +41,12 @@ export default () => {
    */
   const loadUserList = async () => {
     try {
-      const res = await Apis.system.user.getUserList({ rows: 999, status: 1 });
+      const res = await Apis.system.user.getUserList({ rows: 999, status: 1 }) as any;
       const tempList = res?.rows ?? [];
       const transformedObject = tempList.map((item: any) => ({
         ...item,
-        label: item.realName,
-        value: item.userId,
+        label: item.nickname || item.username,
+        value: item.id,
       }));
       console.log('用户列表:', transformedObject);
       setCurrUsers(transformedObject);
@@ -56,7 +57,7 @@ export default () => {
   };
 
   /**
-   * 遍历拿到所有ck true的id
+   * 遍历拿到所有checked true的id
    * @param menuList
    */
   const initCheckMenuList = (menuList: any[]) => {
@@ -66,7 +67,7 @@ export default () => {
       const helper = (items: any[]) => {
         for (const item of items) {
           allNodes.push(item);
-          if (item.ck === true) {
+          if (item.checked === true) {
             ids.push(item.id);
           }
           if (item.children && item.children.length > 0) {
@@ -83,7 +84,7 @@ export default () => {
   };
 
   const buildMenuPath = (record: any): string => {
-    return record.menuName || '';
+    return record.name || '';
   };
 
   const columns: ProColumns<any>[] = [
@@ -154,22 +155,26 @@ export default () => {
     },
     {
       title: '菜单名称',
-      dataIndex: 'menuName',
+      dataIndex: 'name',
       hideInSearch: true,
       align: 'left',
       render: (_: any, record: any) => buildMenuPath(record),
     },
     {
       title: '菜单地址',
-      dataIndex: 'src',
+      dataIndex: 'path',
       align: 'center',
       hideInSearch: true,
     },
     {
-      title: '排序',
-      dataIndex: 'seq',
+      title: '类型',
+      dataIndex: 'type',
       align: 'center',
       hideInSearch: true,
+      render: (_, record: any) => {
+        const typeMap: any = { 1: '目录', 2: '菜单', 3: '按钮' };
+        return typeMap[record.type] || '-';
+      },
     },
   ];
 
@@ -277,10 +282,26 @@ export default () => {
     try {
       if (params && params['roleId']) {
         setCurrRoleId(params['roleId']);
-        const res = await Apis.system.auth.getMenuTreeWithRole(params);
-        
-        initCheckMenuList(res || []);
-        return { data: res || [] };
+        const res = await Apis.system.auth.getRoleMenuTree(params) as any;
+
+        // 构建树结构
+        const buildTree = (items: any[], parentId: string | null = null): any[] => {
+          return items
+            .filter((item) => {
+              if (parentId === null) {
+                return !item.parentId || item.parentId === null || item.parentId === undefined;
+              }
+              return String(item.parentId) === String(parentId);
+            })
+            .map((item) => ({
+              ...item,
+              children: buildTree(items, item.id),
+            }));
+        };
+
+        const treeData = buildTree(res || []);
+        initCheckMenuList(treeData);
+        return { data: treeData };
       } else {
         setSelectedRowKeys([]);
         return { data: [] };
@@ -300,9 +321,26 @@ export default () => {
     try {
       if (params && params['userId']) {
         setCurrUserId(params['userId']);
-        const res = await Apis.system.auth.getMenuTreeWithUser(params);
-        initCheckMenuList(res.data);
-        return res;
+        const res = await Apis.system.auth.getUserMenuTree(params) as any;
+
+        // 构建树结构
+        const buildTree = (items: any[], parentId: string | null = null): any[] => {
+          return items
+            .filter((item) => {
+              if (parentId === null) {
+                return !item.parentId || item.parentId === null || item.parentId === undefined;
+              }
+              return String(item.parentId) === String(parentId);
+            })
+            .map((item) => ({
+              ...item,
+              children: buildTree(items, item.id),
+            }));
+        };
+
+        const treeData = buildTree(res || []);
+        initCheckMenuList(treeData);
+        return { data: treeData };
       } else {
         setSelectedRowKeys([]);
         return { data: [] };

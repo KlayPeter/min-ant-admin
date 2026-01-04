@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
+import loginRoutes from './routes/login.js';
 import userRoutes from './routes/user.js';
 import roleRoutes from './routes/role.js';
 import menuRoutes from './routes/menu.js';
@@ -41,6 +42,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
 }));
 
 // 路由
+app.use('/manage/sys', loginRoutes);
 app.use('/manage/sys/user', userRoutes);
 app.use('/manage/sys/role', roleRoutes);
 app.use('/manage/sys/menu', menuRoutes);

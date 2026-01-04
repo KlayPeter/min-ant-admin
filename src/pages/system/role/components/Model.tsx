@@ -1,6 +1,5 @@
 import {
   ProForm,
-  ProFormDigit,
   ProFormText,
   ProFormTextArea,
 } from "@ant-design/pro-components";
@@ -21,7 +20,7 @@ const RoleModel = forwardRef<
     setOpen(false);
     setEditId(undefined);
   };
-1
+
   const handleOk = () => {
     return formRef.current
       ?.validateFields()
@@ -55,29 +54,22 @@ const RoleModel = forwardRef<
       >
         <Card>
           <ProFormText
-            name="roleName"
-            label="角色名称"
-            required={true}
-            rules={[{ required: true, message: "请输入角色名称" }]}
-          />
-          <ProFormText
             name="roleCode"
             label="角色编码"
             required={true}
             disabled={!!editId}
             rules={[{ required: true, message: "请输入角色编码" }]}
           />
+          <ProFormText
+            name="roleName"
+            label="角色名称"
+            required={true}
+            rules={[{ required: true, message: "请输入角色名称" }]}
+          />
           <ProFormTextArea
             name="description"
             label="角色描述"
             placeholder="请输入角色描述"
-          />
-          <ProFormDigit
-            name="sortOrder"
-            label="排序"
-            min={0}
-            fieldProps={{ precision: 0 }}
-            initialValue={0}
           />
         </Card>
       </ProForm>
