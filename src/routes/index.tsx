@@ -3,6 +3,7 @@ import { withLoadingComponent } from "./components";
 import Login from "@/pages/login";
 import BasicLayout from "@/layout/BasicLayout";
 import Dashboard from "@/pages/dashboard";
+import Error from "@/pages/error";
 import system from "./system";
 import { useRoutes } from "react-router-dom";
 
@@ -14,6 +15,11 @@ export const businessRoutes = [
     element: withLoadingComponent(<Dashboard />),
   },
   system,
+  {
+    path: '*',
+    title: '页面找不到',
+    element: <Error />,
+  },
 ];
 
 const routers = [
